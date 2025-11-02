@@ -1,0 +1,230 @@
+{
+  "name": "Bills workflow (webhook)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-pdf",
+        "options": {}
+      },
+      "id": "85b1f30a-5d53-4e5c-a4ba-346d68da74e2",
+      "name": "Webhook (Upload PDF)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a34b67da-c013-4796-8db6-634537fe0ff8"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "file",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "1e43fd38-9666-46b3-be0e-18dbccbd1100",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=Extract the details of persons with their name and their mobile number which are present in the below text.\n\n{{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "[\n  { \"name\": \"John\", \"mobile\": \"9876543210\" },\n  { \"name\": \"Mary\", \"mobile\": \"9123456789\" }\n]\n",
+        "options": {}
+      },
+      "id": "adbd70dc-72db-41e4-874b-876791a3478e",
+      "name": "Information Extractor",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "e0775e41-7b8e-4664-9126-726fe26e9475",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "qr3UX9HOxuEILKcS",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "id": "0c02371a-9fc6-45e6-be81-5db1cb46078b",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        784,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "365de491-05cd-4b0b-9e7e-8d1123af8c71",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        992,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "phoneNumberId": "833193599870028",
+        "recipientPhoneNumber": "=+91{{ $json['0'].mobile }}",
+        "template": "hello_world|en_US"
+      },
+      "id": "46ef8060-130b-41b2-b95f-61e868a1cdd3",
+      "name": "Send WhatsApp Template",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        0
+      ],
+      "webhookId": "3bfdbcf7-8654-4413-9027-c3d990f3b4b6",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "y3toAdsTssGOF2y6",
+          "name": "WhatsApp account 9"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Split Out": [
+      {
+        "json": {
+          "0": {
+            "name": "Bob",
+            "mobile": "9390896759"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook (Upload PDF)": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send WhatsApp Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Template": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "db624394-0a67-4062-b5b9-90b58c54435f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4f3d833ef0bd131406342105b47f146c9f01e5f2c0faa0aca89e5807bc09a148"
+  },
+  "id": "C1sB0sqeKxgi5omm",
+  "tags": []
+}
