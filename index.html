@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload PDF</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <div class="form-container">
+      <h1>Upload Your PDF</h1>
+      <p class="subtitle">Just upload your PDF — we’ll extract and process the details automatically.</p>
+      
+      <form id="submissionForm">
+        <div class="input-group">
+          <label for="file">Select PDF File</label>
+          <input type="file" id="file" name="file" accept=".pdf" required />
+        </div>
+
+        <button type="submit" id="submitBtn">Upload</button>
+      </form>
+
+      <div id="responseMessage"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
